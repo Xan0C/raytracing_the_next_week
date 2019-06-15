@@ -8,6 +8,7 @@ use crate::camera::Camera;
 use crate::material::Diffuse;
 use crate::material::Metal;
 use crate::material::Dielectric;
+use crate::bvh_node::BvhTree;
 
 use rand::random;
 use std::f32::consts::PI;
@@ -17,9 +18,8 @@ use rand::distributions::Uniform;
 use rand::prelude::*;
 use rayon::prelude::*;
 
-fn create_scene() -> Box<Hitable> {
-    let R = (PI / 4.0).cos();
-    let mut world = HitableList::new();
+fn create_scene() -> Vec<Box<Hitable>> {
+    let mut world: Vec<Box<Hitable>> = Vec::new();
 
     world.push(Box::new(Sphere::new(
         Vec3 { x: 0.0, y: -1000.0, z: 0.0 },
@@ -51,6 +51,9 @@ fn create_scene() -> Box<Hitable> {
                 if choose_mat < 0.8 { //diffuse
                     world.push(Box::new(Sphere::new(
                         center,
+                        //center + Vec3::new(0.0, 0.5 * random::<f32>(), 0.0),
+                        //0.0,
+                        //1.0,
                         0.2,
                         Box::new(Diffuse::new(Vec3::new(random::<f32>() * random::<f32>(), random::<f32>() * random::<f32>(), random::<f32>() * random::<f32>())))
                     )));
@@ -71,7 +74,7 @@ fn create_scene() -> Box<Hitable> {
         }
     }
 
-    return Box::new(world);
+    return world;
 }
 
 fn color_ray(r: &Ray, world: &Hitable, depth: u32) -> Vec3 {
@@ -103,14 +106,17 @@ pub fn render(width: usize, height: usize, samples: usize) -> Vec<RGB<u8>> {
 
     let mut pixels: Vec<RGB<u8>> = vec![RGB {r: 0, g: 0, b: 0}; nx * ny];
     
-    let scene = create_scene();
+    let mut scene = create_scene();
+    let hitableList = Box::new(HitableList::from_list(scene));
+    //let mut wrapper: Vec<Box<Hitable>> = vec!(hitableList);
+    //let bvhTree = BvhTree::new(&mut wrapper);
 
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);
     let dist_to_focus = 10.0;
-    let aperture = 0.1;
+    let aperture = 0.0;
 
-    let camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 20.0, nx as f32 / ny as f32, aperture, dist_to_focus);
+    let camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 20.0, nx as f32 / ny as f32, aperture, dist_to_focus, 0.0, 1.0);
 
     pixels.par_iter_mut().enumerate().for_each(|(i, p)| {
         let x = i % nx;
@@ -126,7 +132,7 @@ pub fn render(width: usize, height: usize, samples: usize) -> Vec<RGB<u8>> {
             let u = (x as f32 + r1) / nx as f32;
             let v = (y as f32 + r2) / ny as f32;
             let r = camera.get_ray(u, v);
-            col += color_ray(&r, &*scene, 0);
+            col += color_ray(&r, &*hitableList, 0);
         }
 
         col /= ns as f32;

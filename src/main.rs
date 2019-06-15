@@ -9,17 +9,18 @@ mod hitable;
 mod camera;
 mod material;
 mod math;
-
 mod render;
+mod aabb;
+mod bvh_node;
 
 use std::time::Instant;
 
 fn main() {
     let start = Instant::now();
 
-    let width: usize = 1920;
-    let height: usize = 1080;
-    let rays = 100;
+    let width: usize = 640;
+    let height: usize = 360;
+    let rays = 10;
 
     let pixels = render::render(width, height, rays);
 

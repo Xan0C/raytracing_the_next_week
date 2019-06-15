@@ -34,7 +34,7 @@ impl Diffuse {
 impl Material for Diffuse {
     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Scatter {
         let target = record.p + record.normal + sphere::random_in_unit_sphere();
-        let scattered = Ray::new(record.p, target - record.p);
+        let scattered = Ray::new(record.p, target - record.p, ray.time);
 
         return Scatter::new(self.albedo, Some(scattered));
     }
@@ -58,7 +58,7 @@ impl Metal {
 impl Material for Metal {
     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Scatter {
         let reflected = math::reflect(ray.direction().normalize(), record.normal);
-        let scattered = Ray::new(record.p, reflected + sphere::random_in_unit_sphere() * self.fuzz);
+        let scattered = Ray::new(record.p, reflected + sphere::random_in_unit_sphere() * self.fuzz, ray.time);
 
         if scattered.direction().dot(record.normal) > 0.0 {
             return Scatter::new(self.albedo, Some(scattered));
@@ -108,9 +108,9 @@ impl Material for Dielectric {
         }
 
         if random::<f32>() < reflect_prob {
-            return Scatter::new(attenuation, Some(Ray::new(record.p, reflected)));
+            return Scatter::new(attenuation, Some(Ray::new(record.p, reflected, ray.time)));
         } else {
-            return Scatter::new(attenuation, Some(Ray::new(record.p, refracted.unwrap())))
+            return Scatter::new(attenuation, Some(Ray::new(record.p, refracted.unwrap(), ray.time)))
         }
     }
 }
