@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Neg, Sub, AddAssign, DivAssign};
+use std::ops::{Add, Div, Mul, Neg, Sub, AddAssign, DivAssign, MulAssign};
 use std::cmp;
 use std::fmt;
 
@@ -16,6 +16,10 @@ impl Vec3 {
 
     pub fn zero() -> Self {
         Vec3 {x: 0.0, y: 0.0, z: 0.0}
+    }
+
+    pub fn values(&self) -> Vec<f32> {
+        vec![self.x, self.y, self.z]
     }
 
     pub fn len_squared(&self) -> f32 {
@@ -164,6 +168,22 @@ impl Mul<f32> for Vec3 {
             y: self.y * other,
             z: self.z * other
         };
+    }
+}
+
+impl MulAssign for Vec3 {
+    fn mul_assign(&mut self, other: Self) {
+        self.x = self.x * other.x;
+        self.y = self.y * other.y;
+        self.z = self.z * other.z;
+    }
+}
+
+impl MulAssign<f32> for Vec3 {
+    fn mul_assign(&mut self, other: f32) {
+        self.x = self.x * other;
+        self.y = self.y * other;
+        self.z = self.z * other;
     }
 }
 

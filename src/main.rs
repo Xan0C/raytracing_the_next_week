@@ -1,5 +1,8 @@
+//#![feature(const_fn)]
+
 extern crate rand;
 extern crate lodepng;
+extern crate lazy_static;
 
 mod ray;
 mod vec;
@@ -12,14 +15,15 @@ mod math;
 mod render;
 mod aabb;
 mod bvh_node;
+mod perlin;
 
 use std::time::Instant;
 
 fn main() {
     let start = Instant::now();
 
-    let width: usize = 640;
-    let height: usize = 360;
+    let width: usize = 1280;
+    let height: usize = 720;
     let rays = 10;
 
     let pixels = render::render(width, height, rays);

@@ -5,13 +5,7 @@ use crate::hitable::Hitable;
 use crate::hitable::HitableList;
 use crate::sphere::Sphere;
 use crate::camera::Camera;
-use crate::material::Diffuse;
-use crate::material::Metal;
-use crate::material::Dielectric;
-use crate::bvh_node::BvhTree;
-
-use rand::random;
-use std::f32::consts::PI;
+use crate::material::*;
 use lodepng::RGB;
 
 use rand::distributions::Uniform;
@@ -20,11 +14,21 @@ use rayon::prelude::*;
 
 fn create_scene() -> Vec<Box<Hitable>> {
     let mut world: Vec<Box<Hitable>> = Vec::new();
+/*
+    let checkerTexture = Box::new(
+        CheckerTexture::new(
+            Box::new(ConstantTexture::new(Vec3::new(0.2, 0.3, 0.1))),
+            Box::new(ConstantTexture::new(Vec3::new(0.9, 0.9, 0.9)))
+        )
+    );
+*/
+    let perlin_texture = Box::new(NoiseTexture::new(4.0));
+    let perlin_tex_sphere = Box::new(NoiseTexture::new(8.0));
 
     world.push(Box::new(Sphere::new(
         Vec3 { x: 0.0, y: -1000.0, z: 0.0 },
         1000.0,
-        Box::new(Diffuse::new(Vec3::new(0.5, 0.5, 0.5)))
+        Box::new(Diffuse::new(perlin_texture))
     )));
     world.push(Box::new(Sphere::new(
         Vec3 { x: 0.0, y: 1.0, z: 0.0 },
@@ -34,14 +38,17 @@ fn create_scene() -> Vec<Box<Hitable>> {
     world.push(Box::new(Sphere::new(
         Vec3 { x: -4.0, y: 1.0, z: 0.0 },
         1.0,
-        Box::new(Diffuse::new(Vec3::new(0.4, 0.2, 0.1)))
+        Box::new(Diffuse::new(
+            //Box::new(ConstantTexture::new(Vec3::new(0.4, 0.2, 0.1)))
+            perlin_tex_sphere
+        ))
     )));
     world.push(Box::new(Sphere::new(
         Vec3 { x: 4.0, y: 1.0, z: 0.0 },
         1.0,
         Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0))
     )));
-
+/*
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = random::<f32>();
@@ -49,13 +56,19 @@ fn create_scene() -> Vec<Box<Hitable>> {
 
             if (center - Vec3::new(4.0, 0.2, 0.0)).len() > 0.9 {
                 if choose_mat < 0.8 { //diffuse
-                    world.push(Box::new(Sphere::new(
+                    world.push(Box::new(Sphere::new_moving_sphere(
                         center,
-                        //center + Vec3::new(0.0, 0.5 * random::<f32>(), 0.0),
-                        //0.0,
-                        //1.0,
+                        center + Vec3::new(0.0, 0.5 * random::<f32>(), 0.0),
+                        0.0,
+                        1.0,
                         0.2,
-                        Box::new(Diffuse::new(Vec3::new(random::<f32>() * random::<f32>(), random::<f32>() * random::<f32>(), random::<f32>() * random::<f32>())))
+                        Box::new(Diffuse::new(
+                            Box::new(
+                                ConstantTexture::new(
+                                    Vec3::new(random::<f32>() * random::<f32>(), random::<f32>() * random::<f32>(), random::<f32>() * random::<f32>())
+                                )
+                            )
+                        ))
                     )));
                 } else if choose_mat < 0.95 {
                     world.push(Box::new(Sphere::new(
@@ -73,7 +86,7 @@ fn create_scene() -> Vec<Box<Hitable>> {
             } 
         }
     }
-
+*/
     return world;
 }
 
@@ -109,7 +122,7 @@ pub fn render(width: usize, height: usize, samples: usize) -> Vec<RGB<u8>> {
     let mut scene = create_scene();
     let hitableList = Box::new(HitableList::from_list(scene));
     //let mut wrapper: Vec<Box<Hitable>> = vec!(hitableList);
-    //let bvhTree = BvhTree::new(&mut wrapper);
+    //let bvhTree = BvhTree::new(&mut scene);
 
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);

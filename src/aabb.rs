@@ -7,59 +7,47 @@ pub struct AABB {
     pub max: Vec3
 }
 
-fn point_inside_min_max(min: f32, max:f32, ray_origin: f32, ray_dir: f32, mut tmin: f32, mut tmax: f32) -> bool {
-    let inv_d = 1.0 / ray_dir;
-
-    let mint = (min - ray_origin) * inv_d;
-    let maxt = (max - ray_origin) * inv_d;
-
-    let t0 = mint.min(maxt);
-    let t1 = mint.max(maxt);
-
-    tmin = tmin.max(t0);
-    tmax = tmax.min(t1);
-
-    if tmax <= tmin {
-        return false;
-    }
-
-    return true;
-}
-
 impl AABB {
     pub fn new(min: Vec3, max: Vec3) -> Self {
         AABB {min, max}
     }
 
-    pub fn hit(&self, ray: &Ray, mut tmin: f32, mut tmax: f32) -> bool {
-        if !point_inside_min_max(self.min.x, self.max.x, ray.origin.x, ray.direction.x, tmin, tmax) {
-            return false;
+    pub fn hit(&self, r: &Ray, mut tmin: f32, mut tmax: f32) -> bool {
+        for a in 0..3 {
+            let mint = (self.min.values()[a] - r.origin.values()[a]) / r.direction.values()[a];
+            let maxt = (self.max.values()[a] - r.origin.values()[a]) / r.direction.values()[a];
+            let t0 = ffmin(mint, maxt);
+            let t1 = ffmax(mint, maxt);
+
+            tmin = ffmax(t0, tmin);
+            tmax = ffmin(t1, tmax);
+
+            if tmax <= tmin {
+                return false;
+            }
         }
 
-        if !point_inside_min_max(self.min.y, self.max.y, ray.origin.y, ray.direction.y, tmin, tmax) {
-            return false;
-        }
-
-        if !point_inside_min_max(self.min.x, self.max.x, ray.origin.x, ray.direction.x, tmin, tmax) {
-            return false;
-        }
-
-        return true;
+        true
     }
 
     pub fn surrounding_box(box0: Self, box1: Self) -> Self {
-         let small = Vec3::new(
-            box0.min.x.min(box1.min.x),
-            box0.min.y.min(box1.min.y),
-            box0.min.z.min(box1.min.z)
-        );
-
+        let small = Vec3::new(
+            ffmin(box0.min.x, box1.min.x),
+            ffmin(box0.min.y, box1.min.y),
+            ffmin(box0.min.z, box1.min.z));
         let big = Vec3::new(
-            box0.max.x.min(box1.max.x),
-            box0.max.y.min(box1.max.y),
-            box0.max.z.min(box1.max.z)
-        );
+            ffmax(box0.max.x, box1.max.x),
+            ffmax(box0.max.y, box1.max.y),
+            ffmax(box0.max.z, box1.max.z));
 
         return AABB::new(small, big);
     }
+}
+
+fn ffmax(a: f32, b: f32) -> f32 {
+  if a > b { a } else { b }
+}
+
+fn ffmin(a: f32, b: f32) -> f32 {
+  if a < b { a } else { b }
 }

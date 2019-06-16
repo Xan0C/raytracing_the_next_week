@@ -38,6 +38,15 @@ impl Sphere {
     pub fn center(&self, time: f32) -> Vec3 {
          return self.center0 + (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0));
     }
+
+    pub fn get_sphere_uv(p: &Vec3) -> (f32,f32) {
+        let phi = p.z.atan2(p.x);
+        let theta = p.y.asin();
+        let u = 1.0 - (phi + std::f32::consts::PI) / 2.0 * std::f32::consts::PI;
+        let v = (theta + std::f32::consts::PI / 2.0) / std::f32::consts::PI;
+
+        (u, v)
+    }
 }
 
 impl<'a> Hitable for Sphere {
@@ -70,13 +79,8 @@ impl<'a> Hitable for Sphere {
     }
 
     fn bounding_box(&self) -> Option<AABB> {
-        //let box0 = AABB::new(self.center0 - Vec3::new(self.radius, self.radius, self.radius), self.center0 + Vec3::new(self.radius, self.radius, self.radius));
-        //let box1 = AABB::new(self.center1 - Vec3::new(self.radius, self.radius, self.radius), self.center1 + Vec3::new(self.radius, self.radius, self.radius));
-        //return Some(AABB::surrounding_box(box0, box1));
-
-        return Some(AABB::new(
-            self.center0 - Vec3::new(self.radius, self.radius, self.radius),
-            self.center0 + Vec3::new(self.radius, self.radius, self.radius),
-        ));
+        let box0 = AABB::new(self.center0 - Vec3::new(self.radius, self.radius, self.radius), self.center0 + Vec3::new(self.radius, self.radius, self.radius));
+        let box1 = AABB::new(self.center1 - Vec3::new(self.radius, self.radius, self.radius), self.center1 + Vec3::new(self.radius, self.radius, self.radius));
+        return Some(AABB::surrounding_box(box0, box1));
     }
 }
