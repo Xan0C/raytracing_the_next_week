@@ -5,6 +5,7 @@ use crate::sphere;
 use crate::math;
 use crate::texture::Texture;
 
+use std::sync::Arc;
 use rand::random;
 
 pub struct Scatter {
@@ -20,14 +21,17 @@ impl Scatter {
 
 pub trait Material: Send + Sync {
     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Scatter;
+    fn emitted(&self, u: f32, v: f32, p: Vec3) -> Vec3 {
+        Vec3::zero()
+    }
 }
 
 pub struct Diffuse {
-    albedo: Box<Texture>
+    albedo: Arc<Texture>
 }
 
 impl Diffuse {
-    pub fn new(a: Box<Texture>) -> Self {
+    pub fn new(a: Arc<Texture>) -> Self {
         Diffuse { albedo: a }
     }
 }
@@ -113,5 +117,25 @@ impl Material for Dielectric {
         } else {
             return Scatter::new(attenuation, Some(Ray::new(record.p, refracted.unwrap(), ray.time)))
         }
+    }
+}
+
+pub struct DiffuseLight {
+    emit: Arc<Texture>
+}
+
+impl DiffuseLight {
+    pub fn new(emit: Arc<Texture>) -> Self {
+        DiffuseLight { emit }
+    }
+}
+
+impl Material for DiffuseLight {
+    fn scatter(&self, ray: &Ray, record: &HitRecord) -> Scatter {
+        Scatter::new(Vec3::zero(), None)
+    }
+
+    fn emitted(&self, u: f32, v: f32, p: Vec3) -> Vec3 {
+        self.emit.value(u, v, &p)
     }
 }

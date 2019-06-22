@@ -1,17 +1,18 @@
 use crate::vec::Vec3;
 use crate::ray::Ray;
 use crate::color;
-use crate::hitable::Hitable;
-use crate::hitable::HitableList;
+use crate::hitable::*;
 use crate::sphere::Sphere;
 use crate::camera::Camera;
 use crate::material::*;
 use crate::texture::*;
-use lodepng::RGB;
+use crate::xy_rect::*;
 
+use lodepng::RGB;
 use rand::distributions::Uniform;
 use rand::prelude::*;
 use rayon::prelude::*;
+use std::sync::Arc;
 
 fn create_scene() -> Vec<Box<Hitable>> {
     let mut world: Vec<Box<Hitable>> = Vec::new();
@@ -23,31 +24,31 @@ fn create_scene() -> Vec<Box<Hitable>> {
         )
     );
 */
-    let perlin_texture = Box::new(NoiseTexture::new(4.0));
-    let perlin_tex_sphere = Box::new(NoiseTexture::new(8.0));
+    let perlin_texture = Arc::new(NoiseTexture::new(4.0));
+    let perlin_tex_sphere = Arc::new(NoiseTexture::new(8.0));
 
     world.push(Box::new(Sphere::new(
         Vec3 { x: 0.0, y: -1000.0, z: 0.0 },
         1000.0,
-        Box::new(Diffuse::new(perlin_texture))
+        Arc::new(Diffuse::new(perlin_texture))
     )));
     world.push(Box::new(Sphere::new(
         Vec3 { x: 0.0, y: 1.0, z: 0.0 },
         1.0,
-        Box::new(Dielectric::new(1.5))
+        Arc::new(Dielectric::new(1.5))
     )));
     world.push(Box::new(Sphere::new(
         Vec3 { x: -4.0, y: 1.0, z: 0.0 },
         1.0,
-        Box::new(Diffuse::new(
-            Box::new(ImageTexture::from_image("earthmap.png"))
+        Arc::new(Diffuse::new(
+            Arc::new(ImageTexture::from_image("earthmap.png"))
             //perlin_tex_sphere
         ))
     )));
     world.push(Box::new(Sphere::new(
         Vec3 { x: 4.0, y: 1.0, z: 0.0 },
         1.0,
-        Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0))
+        Arc::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0))
     )));
 /*
     for a in -11..11 {
@@ -91,6 +92,116 @@ fn create_scene() -> Vec<Box<Hitable>> {
     return world;
 }
 
+fn simple_light() -> Vec<Box<Hitable>> {
+    let mut world: Vec<Box<Hitable>> = Vec::new();
+
+    let perlin_texture_ground = Arc::new(NoiseTexture::new(4.0));
+    let perlin_texture_sphere = Arc::new(NoiseTexture::new(4.0));
+
+    world.push(Box::new(Sphere::new(
+        Vec3 { x: 0.0, y: -1000.0, z: 0.0 },
+        1000.0,
+        Arc::new(Diffuse::new(perlin_texture_ground))
+    )));
+
+    world.push(Box::new(Sphere::new(
+        Vec3 { x: 0.0, y: 2.0, z: 0.0 },
+        2.0,
+        Arc::new(Diffuse::new(perlin_texture_sphere))
+    )));
+
+    world.push(Box::new(Sphere::new(
+        Vec3 { x: 0.0, y: 7.0, z: 0.0 },
+        2.0,
+        Arc::new(DiffuseLight::new(
+            Arc::new(ConstantTexture::new(Vec3::new(4.0, 4.0, 4.0)))
+        ))
+    )));
+
+    world.push(Box::new(XYRect::new(
+        3.0, 5.0, 1.0, 3.0, -2.0,
+        Arc::new(DiffuseLight::new(Arc::new(ConstantTexture::new(Vec3::new(4.0, 4.0, 4.0)))))
+    )));
+
+    return world;
+}
+
+fn cornell_box() -> Vec<Box<Hitable>> {
+    let mut world: Vec<Box<Hitable>> = Vec::new();
+
+    let red: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.65, 0.05, 0.05)))
+    ));
+
+    let white: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.73, 0.73, 0.73)))
+    ));
+
+    let green: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.12, 0.45, 0.15)))
+    ));
+
+    let light: Arc<Material> = Arc::new(DiffuseLight::new(
+        Arc::new(ConstantTexture::new(Vec3::new(15.0, 15.0, 15.0)))
+    ));
+    
+    world.push(Box::new(FlipNormal::new(Box::new(YZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::clone(&green)
+    )))));
+
+    world.push(Box::new(YZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Arc::clone(&red)
+    )));
+
+    world.push(Box::new(XZRect::new(
+        213.0,
+        343.0,
+        227.0,
+        332.0,
+        554.0,
+        Arc::clone(&light)
+    )));
+
+    world.push(Box::new(FlipNormal::new(Box::new(XZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::clone(&white)
+    )))));
+
+    world.push(Box::new(XZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Arc::clone(&white)
+    )));
+
+    world.push(Box::new(FlipNormal::new(Box::new(XYRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::clone(&white)
+    )))));
+
+    return world;
+}
+
 fn color_ray(r: &Ray, world: &Hitable, depth: u32) -> Vec3 {
     if let Some(record) = world.hit(&r, 0.001..std::f32::MAX) {
 
@@ -99,17 +210,16 @@ fn color_ray(r: &Ray, world: &Hitable, depth: u32) -> Vec3 {
         }
 
         let scattered = record.material.scatter(&r, &record);
+        let emitted = record.material.emitted(record.u, record.v, record.p);
 
         if let Some(hit) = scattered.ray {
-            return color_ray(&hit, world, depth+1) * scattered.attenuation;
+            return emitted + color_ray(&hit, world, depth+1) * scattered.attenuation;
         } else {
-            Vec3::new(0.0, 0.0, 0.0)
+            emitted
         }
 
     } else {
-        let unit_direction = r.direction().normalize();
-        let t = (unit_direction.y + 1.0) * 0.5;
-        return Vec3 { x: 1.0, y: 1.0, z: 1.0 } * (1.0 - t) + Vec3 { x: 0.5, y: 0.7, z: 1.0 } * t;
+        Vec3::zero()
     }
 }
 
@@ -120,17 +230,17 @@ pub fn render(width: usize, height: usize, samples: usize) -> Vec<RGB<u8>> {
 
     let mut pixels: Vec<RGB<u8>> = vec![RGB {r: 0, g: 0, b: 0}; nx * ny];
     
-    let mut scene = create_scene();
+    let mut scene = cornell_box();
     let hitableList = Box::new(HitableList::from_list(scene));
     //let mut wrapper: Vec<Box<Hitable>> = vec!(hitableList);
     //let bvhTree = BvhTree::new(&mut scene);
 
-    let lookfrom = Vec3::new(13.0, 2.0, 3.0);
-    let lookat = Vec3::new(0.0, 0.0, 0.0);
+    let lookfrom = Vec3::new(278.0, 278.0, -800.0);
+    let lookat = Vec3::new(278.0, 278.0, 0.0);
     let dist_to_focus = 10.0;
     let aperture = 0.0;
 
-    let camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 20.0, nx as f32 / ny as f32, aperture, dist_to_focus, 0.0, 1.0);
+    let camera = Camera::new(lookfrom, lookat, Vec3::new(0.0, 1.0, 0.0), 40.0, nx as f32 / ny as f32, aperture, dist_to_focus, 0.0, 1.0);
 
     pixels.par_iter_mut().enumerate().for_each(|(i, p)| {
         let x = i % nx;

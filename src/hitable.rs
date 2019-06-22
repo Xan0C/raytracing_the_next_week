@@ -82,3 +82,28 @@ impl Hitable for HitableList {
     Some(surrounding_box)
   }
 }
+
+pub struct FlipNormal {
+  pub hitable: Box<Hitable>
+}
+
+impl FlipNormal {
+  pub fn new(hitable: Box<Hitable>) -> Self {
+    FlipNormal { hitable }
+  }
+}
+
+impl Hitable for FlipNormal {
+   fn hit(&self, ray: &Ray, t_range: ::std::ops::Range<f32>) -> Option<HitRecord> {
+     if let Some(mut hit) = self.hitable.hit(ray, t_range) {
+       hit.normal = hit.normal * -1.0;
+       return Some(hit);
+     }
+     
+     None
+   }
+
+   fn bounding_box(&self) -> Option<AABB> {
+     self.hitable.bounding_box()
+   }
+}

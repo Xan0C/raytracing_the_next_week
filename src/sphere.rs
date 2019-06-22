@@ -6,6 +6,7 @@ use crate::material::Material;
 use crate::aabb::AABB;
 
 use rand::random;
+use std::sync::Arc;
 
 pub fn random_in_unit_sphere() -> Vec3 {
     let mut p: Vec3;
@@ -23,15 +24,15 @@ pub struct Sphere {
     center1: Vec3,
     time0: f32,
     time1: f32,
-    material: Box<Material>
+    material: Arc<Material>
 }
 
 impl Sphere {
-    pub fn new(orig: Vec3, rad: f32, material: Box<Material>) -> Self {
+    pub fn new(orig: Vec3, rad: f32, material: Arc<Material>) -> Self {
         Sphere { radius: rad, center0: orig , center1: orig, time0: 0.0, time1: 1.0, material }
     }
 
-    pub fn new_moving_sphere(center0: Vec3, center1: Vec3, time0: f32, time1: f32, radius: f32, material: Box<Material>) -> Self {
+    pub fn new_moving_sphere(center0: Vec3, center1: Vec3, time0: f32, time1: f32, radius: f32, material: Arc<Material>) -> Self {
         Sphere { center0, center1, time0, time1, radius, material }
     }
 
