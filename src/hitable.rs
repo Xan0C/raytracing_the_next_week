@@ -7,13 +7,15 @@ use crate::aabb::AABB;
 pub struct HitRecord<'a> {
     pub t: f32,
     pub p: Vec3,
+    pub u: f32,
+    pub v: f32,
     pub normal: Vec3,
     pub material: &'a Material
 }
 
 impl<'a> HitRecord<'a> {
-    pub fn new(t: f32, p: Vec3, n: Vec3, material: &'a Material) -> Self {
-        HitRecord { t, p, normal: n, material }
+    pub fn new(t: f32, p: Vec3, n: Vec3, material: &'a Material, u: f32, v: f32) -> Self {
+        HitRecord { t, p, normal: n, material, u, v }
     }
 }
 

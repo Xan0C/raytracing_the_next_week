@@ -39,10 +39,10 @@ impl Sphere {
          return self.center0 + (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0));
     }
 
-    pub fn get_sphere_uv(p: &Vec3) -> (f32,f32) {
+    pub fn get_sphere_uv(p: Vec3) -> (f32,f32) {
         let phi = p.z.atan2(p.x);
         let theta = p.y.asin();
-        let u = 1.0 - (phi + std::f32::consts::PI) / 2.0 * std::f32::consts::PI;
+        let u = 1.0 - (phi + std::f32::consts::PI) / (2.0 * std::f32::consts::PI);
         let v = (theta + std::f32::consts::PI / 2.0) / std::f32::consts::PI;
 
         (u, v)
@@ -64,14 +64,16 @@ impl<'a> Hitable for Sphere {
             if t < t_range.end && t > t_range.start {
                 let p = r.point_at_parameter(t);
                 let normal = (p - self.center(r.time)) / self.radius;
-                return Some(HitRecord::new(t, p, normal, &*self.material));
+                let uv = Sphere::get_sphere_uv( (p - self.center(r.time)) / self.radius );
+                return Some(HitRecord::new(t, p, normal, &*self.material, uv.0, uv.1));
             }
 
             let t = (-b + (b * b - a * c).sqrt()) / a;
             if t < t_range.end && t > t_range.start {
                 let p = r.point_at_parameter(t);
                 let normal = (p - self.center(r.time)) / self.radius;
-                return Some(HitRecord::new(t, p, normal, &*self.material));
+                let uv = Sphere::get_sphere_uv( (p - self.center(r.time)) / self.radius );
+                return Some(HitRecord::new(t, p, normal, &*self.material, uv.0, uv.1));
             }
         }
 

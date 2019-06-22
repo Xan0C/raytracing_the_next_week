@@ -6,6 +6,7 @@ use crate::hitable::HitableList;
 use crate::sphere::Sphere;
 use crate::camera::Camera;
 use crate::material::*;
+use crate::texture::*;
 use lodepng::RGB;
 
 use rand::distributions::Uniform;
@@ -39,8 +40,8 @@ fn create_scene() -> Vec<Box<Hitable>> {
         Vec3 { x: -4.0, y: 1.0, z: 0.0 },
         1.0,
         Box::new(Diffuse::new(
-            //Box::new(ConstantTexture::new(Vec3::new(0.4, 0.2, 0.1)))
-            perlin_tex_sphere
+            Box::new(ImageTexture::from_image("earthmap.png"))
+            //perlin_tex_sphere
         ))
     )));
     world.push(Box::new(Sphere::new(

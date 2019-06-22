@@ -16,6 +16,7 @@ mod render;
 mod aabb;
 mod bvh_node;
 mod perlin;
+mod texture;
 
 use std::time::Instant;
 
