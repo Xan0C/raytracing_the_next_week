@@ -18,6 +18,14 @@ impl Vec3 {
         Vec3 {x: 0.0, y: 0.0, z: 0.0}
     }
 
+    pub fn max() -> Self {
+        Vec3 { x: std::f32::MAX, y: std::f32::MAX, z: std::f32::MAX }
+    }
+
+    pub fn min() -> Self {
+        Vec3 { x: std::f32::MIN, y: std::f32::MIN, z: std::f32::MIN }
+    }
+
     pub fn values(&self) -> Vec<f32> {
         vec![self.x, self.y, self.z]
     }

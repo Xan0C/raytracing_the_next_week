@@ -27,7 +27,7 @@ fn main() {
 
     let width: usize = 1280;
     let height: usize = 720;
-    let rays = 200;
+    let rays = 10;
 
     let pixels = render::render(width, height, rays);
 

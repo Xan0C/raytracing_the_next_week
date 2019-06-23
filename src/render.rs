@@ -201,14 +201,185 @@ fn cornell_box() -> Vec<Box<Hitable>> {
         Arc::clone(&white)
     )))));
 
-    world.push(Box::new(
-        BoxModel::new(Vec3::new(130.0, 0.0, 65.0), Vec3::new(295.0, 165.0, 230.0), Arc::clone(&white))
+    world.push(
+        Box::new(Translate::new(
+            Arc::new(RotateY::new(
+                Arc::new(BoxModel::new(Vec3::zero(), Vec3::new(165.0, 165.0, 165.0), Arc::clone(&white))),
+                -18.0
+            )),
+            Vec3::new(130.0, 0.0, 65.0)
+        ))
+    );
+
+    world.push(
+        Box::new(Translate::new(
+            Arc::new(RotateY::new(
+                Arc::new(BoxModel::new(Vec3::zero(), Vec3::new(165.0, 330.0, 165.0), Arc::clone(&white))),
+                15.0
+            )),
+            Vec3::new(265.0, 0.0, 295.0)
+        ))
+    );
+
+    return world;
+}
+
+fn cornell_smoke() -> Vec<Box<Hitable>> {
+    let mut world: Vec<Box<Hitable>> = Vec::new();
+
+    let red: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.65, 0.05, 0.05)))
+    ));
+
+    let white: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.73, 0.73, 0.73)))
+    ));
+
+    let green: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.12, 0.45, 0.15)))
+    ));
+
+    let light: Arc<Material> = Arc::new(DiffuseLight::new(
+        Arc::new(ConstantTexture::new(Vec3::new(7.0, 7.0, 7.0)))
+    ));
+    
+    world.push(Box::new(FlipNormal::new(Box::new(YZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::clone(&green)
+    )))));
+
+    world.push(Box::new(YZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Arc::clone(&red)
+    )));
+
+    world.push(Box::new(XZRect::new(
+        113.0,
+        443.0,
+        127.0,
+        432.0,
+        554.0,
+        Arc::clone(&light)
+    )));
+
+    world.push(Box::new(FlipNormal::new(Box::new(XZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::clone(&white)
+    )))));
+
+    world.push(Box::new(XZRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Arc::clone(&white)
+    )));
+
+    world.push(Box::new(FlipNormal::new(Box::new(XYRect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Arc::clone(&white)
+    )))));
+
+ 
+    let box1 = Arc::new(Translate::new(
+        Arc::new(RotateY::new(
+            Arc::new(BoxModel::new(Vec3::zero(), Vec3::new(165.0, 165.0, 165.0), Arc::clone(&white))),
+            -18.0
+        )),
+        Vec3::new(130.0, 0.0, 65.0)
+    ));
+
+
+    let box2 = Arc::new(Translate::new(
+        Arc::new(RotateY::new(
+            Arc::new(BoxModel::new(Vec3::zero(), Vec3::new(165.0, 330.0, 165.0), Arc::clone(&white))),
+            15.0
+        )),
+        Vec3::new(265.0, 0.0, 295.0)
     ));
 
     world.push(Box::new(
-        BoxModel::new(Vec3::new(265.0, 0.0, 295.0), Vec3::new(430.0, 330.0, 460.0), Arc::clone(&white))
+        ConstantMedium::new(box1, 0.01, Arc::new(ConstantTexture::new(Vec3::new(1.0, 1.0, 1.0))))
     ));
 
+    world.push(Box::new(
+        ConstantMedium::new(box2, 0.01, Arc::new(ConstantTexture::new(Vec3::zero())))
+    ));
+
+    return world;
+}
+
+fn the_next_week() -> Vec<Box<Hitable>> {
+    let mut world: Vec<Box<Hitable>> = Vec::new();
+
+    let white: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.73, 0.73, 0.73)))
+    ));
+
+    let ground: Arc<Material> = Arc::new(Diffuse::new(
+        Arc::new(ConstantTexture::new(Vec3::new(0.48, 0.83, 0.53)))
+    ));
+
+    let w = 100;
+    let y0 = 0;
+    //let mut boxlist: Vec<Box<Hitable>> = Vec::new();
+
+    for i in 0..20 {
+        for j in 0..20 {
+            let x0 = -1000 + i * w;
+            let z0 = -1000 + j * w;
+
+            let x1 = x0 + w;
+            let y1 = 100.0 * (random::<f32>() + 0.01);
+
+            let z1 = z0 + w;
+
+            world.push(
+                Box::new(
+                    BoxModel::new(
+                        Vec3::new(x0 as f32, y0 as f32, z0 as f32),
+                        Vec3::new(x1 as f32, y1 as f32, z1 as f32),
+                        Arc::clone(&ground)
+                    )
+                )
+            );
+        }
+    }
+
+    let light: Arc<Material> = Arc::new(DiffuseLight::new(
+        Arc::new(ConstantTexture::new(Vec3::new(7.0, 7.0, 7.0)))
+    ));
+
+    world.push(Box::new(XZRect::new(
+        123.0,
+        423.0,
+        147.0,
+        412.0,
+        554.0,
+        Arc::clone(&light)
+    )));
+
+    //world.push(Box::new(
+    //    BvhTree::new(boxlist)
+    //))
+    
     return world;
 }
 
@@ -240,7 +411,7 @@ pub fn render(width: usize, height: usize, samples: usize) -> Vec<RGB<u8>> {
 
     let mut pixels: Vec<RGB<u8>> = vec![RGB {r: 0, g: 0, b: 0}; nx * ny];
     
-    let mut scene = cornell_box();
+    let mut scene = the_next_week();
     let hitableList = Box::new(HitableList::from_list(scene));
     //let mut wrapper: Vec<Box<Hitable>> = vec!(hitableList);
     //let bvhTree = BvhTree::new(&mut scene);
