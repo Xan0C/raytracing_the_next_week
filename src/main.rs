@@ -18,6 +18,7 @@ mod bvh_node;
 mod perlin;
 mod texture;
 mod xy_rect;
+mod box_model;
 
 use std::time::Instant;
 
@@ -26,7 +27,7 @@ fn main() {
 
     let width: usize = 1280;
     let height: usize = 720;
-    let rays = 30;
+    let rays = 200;
 
     let pixels = render::render(width, height, rays);
 

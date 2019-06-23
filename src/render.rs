@@ -7,6 +7,8 @@ use crate::camera::Camera;
 use crate::material::*;
 use crate::texture::*;
 use crate::xy_rect::*;
+use crate::box_model::*;
+use crate::bvh_node::*;
 
 use lodepng::RGB;
 use rand::distributions::Uniform;
@@ -198,6 +200,14 @@ fn cornell_box() -> Vec<Box<Hitable>> {
         555.0,
         Arc::clone(&white)
     )))));
+
+    world.push(Box::new(
+        BoxModel::new(Vec3::new(130.0, 0.0, 65.0), Vec3::new(295.0, 165.0, 230.0), Arc::clone(&white))
+    ));
+
+    world.push(Box::new(
+        BoxModel::new(Vec3::new(265.0, 0.0, 295.0), Vec3::new(430.0, 330.0, 460.0), Arc::clone(&white))
+    ));
 
     return world;
 }
