@@ -12,14 +12,6 @@ impl Ray {
         Ray { origin: origin, direction: dir, time }
     }
 
-    pub fn origin(&self) -> vec::Vec3 {
-        return self.origin;
-    }
-
-    pub fn direction(&self) -> vec::Vec3 {
-        return self.direction;
-    }
-
     pub fn point_at_parameter(&self, t: f32) -> vec::Vec3 {
         return self.origin + self.direction * t;
     }

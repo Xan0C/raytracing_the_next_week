@@ -18,18 +18,21 @@ pub struct BvhTree<'a> {
 }
 
 struct BvhNode<'a> {
-    pub bbox: Option<AABB>,
-    pub left: Option<NodeId>,
-    pub right: Option<NodeId>,
-    pub hitable: Option<&'a Box<Hitable>>
+    bbox: Option<AABB>,
+    left: Option<NodeId>,
+    right: Option<NodeId>,
+    hitable: Option<&'a Box<Hitable>>
 }
 
 impl<'a> BvhTree<'a> {
     pub fn new(l: &'a mut [Box<Hitable>]) -> Self {
         let mut tree = BvhTree { nodes: Vec::new(), root: NodeId { index: 0 }};
         tree.root = tree.build(l);
-
         return tree;
+    }
+
+    pub fn print(&self) {
+      println!("BVH Tree with {} Nodes", self.nodes.len());
     }
 
     fn build(&mut self, l: &'a mut [Box<Hitable>]) -> NodeId {
@@ -59,7 +62,7 @@ impl<'a> BvhTree<'a> {
 
         if let Some(left_box) = self.nodes[left.index].bbox {
             if let Some(right_box) = self.nodes[right.index].bbox {
-                return self.add_node(AABB::surrounding_box(left_box, right_box), left, right);
+                return self.add_node(AABB::surrounding_box(&left_box, &right_box), left, right);
             }
         }
 
@@ -92,10 +95,10 @@ impl<'a> BvhTree<'a> {
         NodeId { index: next_index }
     }
 
-    fn hit(&self, id: NodeId, r: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
-        let node = &self.nodes[id.index];
-        if node.bbox.is_some() && node.bbox.unwrap().hit(r, tmin, tmax) {
+    fn hit_tree(&self, id: NodeId, r: &Ray, tmin: f32, tmax: f32) -> Option<HitRecord> {
+      let node = &self.nodes[id.index];
 
+      if node.bbox.is_none() || node.bbox.is_some() && node.bbox.unwrap().hit(r, tmin, tmax) {
             match node.hitable {
                 Some(ref hitable) => return hitable.hit(r, tmin..tmax),
                 None => { }
@@ -104,24 +107,29 @@ impl<'a> BvhTree<'a> {
             let mut hit_left: Option<HitRecord> = None;
             let mut hit_right: Option<HitRecord> = None;
 
-            if let Some(left) = node.left {
-                hit_left = self.hit(left, r, tmin, tmax);
+            if let Some(ref left) = node.left {
+                //println!("check if left node is hit");
+                hit_left = self.hit_tree(*left, r, tmin, tmax);
             }
 
-            if let Some(right) = node.right {
-                hit_right = self.hit(right, r, tmin, tmax);
+            if let Some(ref right) = node.right {
+                //println!("check if right node is hit");
+                hit_right = self.hit_tree(*right, r, tmin, tmax);
             }
 
-            if hit_left.is_some() && hit_right.is_some() {
-                if hit_left.unwrap().t < hit_right.unwrap().t {
-                    return hit_left;
-                } else {
-                    return hit_right;
+            match hit_left {
+              Some(left) => {
+                match hit_right {
+                  Some(right) => if left.t < right.t { return hit_left; } else { return hit_right; },
+                  None => return hit_left
                 }
-            } else if hit_left.is_some() {
-                return hit_left;
-            } else if hit_right.is_some() {
-                return hit_right;
+              },
+              None => {}
+            }
+
+            match hit_right {
+              Some(_right) => return hit_right,
+              None => {}
             }
         }
         return None;
@@ -134,7 +142,7 @@ impl<'a> Hitable for BvhTree<'a> {
     }
 
     fn hit(&self, r: &Ray, t_range: ::std::ops::Range<f32>) -> Option<HitRecord> {
-        self.hit(self.root, r, t_range.start, t_range.end)
+        self.hit_tree(self.root, r, t_range.start, t_range.end)
     }
 }
 

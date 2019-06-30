@@ -76,9 +76,9 @@ impl Hitable for HitableList {
       None => return None
     }
 
-    for hitable in &(self.list) {
-      if let Some(bbox) = hitable.bounding_box() {
-        surrounding_box = AABB::surrounding_box(bbox, surrounding_box);
+    for i in 1..self.list.len() {
+      if let Some(bbox) = self.list[i].bounding_box() {
+        surrounding_box = AABB::surrounding_box(&bbox, &surrounding_box);
       } else {
         return None;
       }
@@ -142,7 +142,7 @@ impl Hitable for Translate {
   }
 
   fn bounding_box(&self) -> Option<AABB> {
-    if let Some(bbox) = self.bounding_box() {
+    if let Some(bbox) = self.hitable.bounding_box() {
       return Some(AABB::new(bbox.min + self.offset, bbox.max + self.offset));
     }
     None

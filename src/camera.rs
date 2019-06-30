@@ -15,13 +15,12 @@ pub struct Camera {
 }
 
 fn random_in_unit_disk() -> Vec3 {
-    let mut p;
-    while {
-        p = Vec3::new(random::<f32>(), random::<f32>(), 0.0) * 2.0 - Vec3::new(1.0, 1.0, 0.0);
-        p.dot(p) >= 1.0
-    } {}
-
-    return p;
+    loop {
+        let p = Vec3::new(rand::random::<f32>(), rand::random::<f32>(), 0.0) * 2.0 - Vec3::new(1.0, 1.0, 0.0);
+        if p.dot(p) < 1.0 {
+            return p;
+        }
+    }
 }
 
 impl Camera {

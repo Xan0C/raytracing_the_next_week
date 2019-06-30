@@ -62,10 +62,10 @@ impl Metal {
 
 impl Material for Metal {
     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Scatter {
-        let reflected = math::reflect(ray.direction().normalize(), record.normal);
+        let reflected = math::reflect(ray.direction.normalize(), record.normal);
         let scattered = Ray::new(record.p, reflected + sphere::random_in_unit_sphere() * self.fuzz, ray.time);
 
-        if scattered.direction().dot(record.normal) > 0.0 {
+        if scattered.direction.dot(record.normal) > 0.0 {
             return Scatter::new(self.albedo, Some(scattered));
         }
 
@@ -85,7 +85,7 @@ impl Dielectric {
 
 impl Material for Dielectric {
     fn scatter(&self, ray: &Ray, record: &HitRecord) -> Scatter {
-        let reflected = math::reflect(ray.direction(), record.normal);
+        let reflected = math::reflect(ray.direction, record.normal);
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
 
         let outward_normal: Vec3;
@@ -94,17 +94,17 @@ impl Material for Dielectric {
         let cosine: f32;
 
 
-        if ray.direction().dot(record.normal) > 0.0 {
+        if ray.direction.dot(record.normal) > 0.0 {
             outward_normal = -record.normal;
             ni_over_nt = self.ref_idx;
-            cosine = self.ref_idx * ray.direction().dot(record.normal) / ray.direction().len();
+            cosine = self.ref_idx * ray.direction.dot(record.normal) / ray.direction.len();
         } else {
             outward_normal = record.normal;
             ni_over_nt = 1.0 / self.ref_idx;
-            cosine = -ray.direction().dot(record.normal) / ray.direction().len();
+            cosine = -ray.direction.dot(record.normal) / ray.direction.len();
         }
 
-        let refracted = math::refract(ray.direction(), outward_normal, ni_over_nt);
+        let refracted = math::refract(ray.direction, outward_normal, ni_over_nt);
 
         if refracted.is_some() {
             reflect_prob = math::schlick(cosine, self.ref_idx);

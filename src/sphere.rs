@@ -52,9 +52,9 @@ impl Sphere {
 
 impl<'a> Hitable for Sphere {
     fn hit(&self, r: &Ray, t_range: ::std::ops::Range<f32>) -> Option<HitRecord> {
-        let oc = r.origin() - self.center(r.time);
-        let a = r.direction().dot(r.direction());
-        let b = oc.dot(r.direction());
+        let oc = r.origin - self.center(r.time);
+        let a = r.direction.dot(r.direction);
+        let b = oc.dot(r.direction);
         let c = oc.dot(oc) - self.radius * self.radius;
 
         let discriminant = b * b - a * c;
@@ -84,6 +84,6 @@ impl<'a> Hitable for Sphere {
     fn bounding_box(&self) -> Option<AABB> {
         let box0 = AABB::new(self.center0 - Vec3::new(self.radius, self.radius, self.radius), self.center0 + Vec3::new(self.radius, self.radius, self.radius));
         let box1 = AABB::new(self.center1 - Vec3::new(self.radius, self.radius, self.radius), self.center1 + Vec3::new(self.radius, self.radius, self.radius));
-        return Some(AABB::surrounding_box(box0, box1));
+        return Some(AABB::surrounding_box(&box0, &box1));
     }
 }

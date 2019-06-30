@@ -13,24 +13,50 @@ impl AABB {
     }
 
     pub fn hit(&self, r: &Ray, mut tmin: f32, mut tmax: f32) -> bool {
-        for a in 0..3 {
-            let mint = (self.min.values()[a] - r.origin.values()[a]) / r.direction.values()[a];
-            let maxt = (self.max.values()[a] - r.origin.values()[a]) / r.direction.values()[a];
-            let t0 = ffmin(mint, maxt);
-            let t1 = ffmax(mint, maxt);
+        
+        let mint = (self.min.x - r.origin.x) / r.direction.x;
+        let maxt = (self.max.x - r.origin.x) / r.direction.x;
 
-            tmin = ffmax(t0, tmin);
-            tmax = ffmin(t1, tmax);
+        let t0 = ffmin(mint, maxt);
+        let t1 = ffmax(mint, maxt);
 
-            if tmax <= tmin {
-                return false;
-            }
+        tmin = ffmax(t0, tmin);
+        tmax = ffmin(t1, tmax);
+
+        if tmax <= tmin {
+            return false;
+        }
+
+        let mint = (self.min.y - r.origin.y) / r.direction.y;
+        let maxt = (self.max.y - r.origin.y) / r.direction.y;
+
+        let t0 = ffmin(mint, maxt);
+        let t1 = ffmax(mint, maxt);
+
+        tmin = ffmax(t0, tmin);
+        tmax = ffmin(t1, tmax);
+
+        if tmax <= tmin {
+            return false;
+        }
+
+        let mint = (self.min.z - r.origin.z) / r.direction.z;
+        let maxt = (self.max.z - r.origin.z) / r.direction.z;
+
+        let t0 = ffmin(mint, maxt);
+        let t1 = ffmax(mint, maxt);
+
+        tmin = ffmax(t0, tmin);
+        tmax = ffmin(t1, tmax);
+
+        if tmax <= tmin {
+            return false;
         }
 
         true
     }
 
-    pub fn surrounding_box(box0: Self, box1: Self) -> Self {
+    pub fn surrounding_box(box0: &Self, box1: &Self) -> Self {
         let small = Vec3::new(
             ffmin(box0.min.x, box1.min.x),
             ffmin(box0.min.y, box1.min.y),

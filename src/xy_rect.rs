@@ -78,7 +78,7 @@ impl Hitable for XYRect {
     }
 
     fn bounding_box(&self) -> Option<AABB> {
-        Some(AABB::new(Vec3::new(self.x0, self.y0, self.k - 0.0001), Vec3::new(self.x1, self.y1, self.k - 0.0001)))
+        Some(AABB::new(Vec3::new(self.x0, self.y0, self.k - 0.0001), Vec3::new(self.x1, self.y1, self.k + 0.0001)))
     }
 }
 
@@ -108,7 +108,7 @@ impl Hitable for XZRect {
     }
 
     fn bounding_box(&self) -> Option<AABB> {
-        Some(AABB::new(Vec3::new(self.x0, self.z0, self.k - 0.0001), Vec3::new(self.x1, self.z1, self.k - 0.0001)))
+        Some(AABB::new(Vec3::new(self.x0, self.k - 0.0001, self.z0), Vec3::new(self.x1, self.k + 0.0001, self.z1)))
     }
 }
 
@@ -138,6 +138,6 @@ impl Hitable for YZRect {
     }
 
     fn bounding_box(&self) -> Option<AABB> {
-        Some(AABB::new(Vec3::new(self.y0, self.z0, self.k - 0.0001), Vec3::new(self.y1, self.z1, self.k - 0.0001)))
+        Some(AABB::new(Vec3::new(self.k - 0.0001, self.y0, self.z0), Vec3::new(self.k + 0.0001, self.y1, self.z1)))
     }
 }
