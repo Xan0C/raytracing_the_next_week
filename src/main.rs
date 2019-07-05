@@ -411,7 +411,7 @@ fn the_next_week() -> Vec<Box<Hitable>> {
     }
 
     let light: Arc<Material> = Arc::new(DiffuseLight::new(
-        Arc::new(ConstantTexture::new(Vec3::new(15.0, 15.0, 15.0)))
+        Arc::new(ConstantTexture::new(Vec3::new(7.0, 7.0, 7.0)))
     ));
 
     world.push(Box::new(XZRect::new(
@@ -436,27 +436,29 @@ fn the_next_week() -> Vec<Box<Hitable>> {
         ))
     )));
 
+/*
     world.push(Box::new(Sphere::new(
         Vec3::new(260.0, 150.0, 45.0),
         50.0,
         Arc::new(Dielectric::new(1.5))
     )));
+    */
 
     world.push(Box::new(Sphere::new(
         Vec3::new(0.0, 150.0, 145.0),
         50.0,
         Arc::new(Metal::new(Vec3::new(0.8, 0.8, 0.9), 10.0))
-    )));
+    )));  
 
     world.push(Box::new(Sphere::new(
-        Vec3::new(360.0, 150.0, 145.0),
+        Vec3::new(460.0, 150.0, 145.0),
         70.0,
         Arc::new(Dielectric::new(1.5))
     )));
-
+    
     world.push(Box::new(ConstantMedium::new(
         Arc::new(Sphere::new(
-            Vec3::new(360.0, 150.0, 145.0),
+            Vec3::new(460.0, 150.0, 145.0),
             70.0,
             Arc::new(Dielectric::new(1.5))
         )),
@@ -464,10 +466,11 @@ fn the_next_week() -> Vec<Box<Hitable>> {
         Arc::new(ConstantTexture::new(Vec3::new(0.2, 0.4, 0.9)))
     )));
 
+
     world.push(Box::new(ConstantMedium::new(
         Arc::new(Sphere::new(
             Vec3::new(0.0, 0.0, 0.0),
-            50000.0,
+            5000.0,
             Arc::new(Dielectric::new(1.5))
         )),
         0.0001,
@@ -490,16 +493,16 @@ fn the_next_week() -> Vec<Box<Hitable>> {
         )))
     )));
 
-    let mut list = HitableList::new();
+    //let mut list = HitableList::new();
 
     for _ in 0..1000 {
-        list.push(Box::new(Sphere::new(
-            Vec3::new(165.0 *  random::<f32>(), 165.0 *  random::<f32>(), 165.0 *  random::<f32>()),
+        world.push(Box::new(Sphere::new(
+            Vec3::new(165.0 *  random::<f32>(), 165.0 *  random::<f32>() + 300.0, 165.0 *  random::<f32>() + 90.0),
             10.0,
             Arc::clone(&white)
         )));
     }
-
+    /*
     world.push(Box::new(Translate::new(
         Arc::new(RotateY::new(
             Arc::new(list),
@@ -507,7 +510,7 @@ fn the_next_week() -> Vec<Box<Hitable>> {
         )),
         Vec3::new(-100.0, 270.0, 395.0)
     )));
-    
+    */
     return world;
 }
 
@@ -548,13 +551,13 @@ fn main() {
 
     let start = Instant::now();
 
-    let width: usize = matches.value_of("width").unwrap_or("640").parse::<usize>().unwrap();;
-    let height: usize = matches.value_of("height").unwrap_or("320").parse::<usize>().unwrap();;
-    let rays = matches.value_of("samples").unwrap_or("10").parse::<usize>().unwrap();
+    let width: usize = matches.value_of("width").unwrap_or("1280").parse::<usize>().unwrap();;
+    let height: usize = matches.value_of("height").unwrap_or("720").parse::<usize>().unwrap();;
+    let rays = matches.value_of("samples").unwrap_or("100").parse::<usize>().unwrap();
     let max_ray_depth = matches.value_of("max_ray_depth").unwrap_or("10").parse::<u32>().unwrap();
 
     //scene
-    let mut world = cornell_box();
+    let mut world = the_next_week();
     let scene = Scene::new(&mut world, max_ray_depth);
 
     //camera
